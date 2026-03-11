@@ -5,7 +5,11 @@ from typing import Optional, Dict, Any
 
 from sqlalchemy import create_engine, Column, String, DateTime, Integer, Text, JSON
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm Script start.sh not found
+✖ 
+No start command was found
+
+. import sessionmaker, Session
 import datetime
 
 # Database setup

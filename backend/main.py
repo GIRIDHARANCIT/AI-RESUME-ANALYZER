@@ -10,14 +10,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from routes import auth, resume, hr, individual, report
-from database import init_db
 
-# Initialize database
-init_db()
-
-# Ensure storage directory exists
+# Ensure storage directory exists BEFORE database init
 STORAGE_PATH = Path(__file__).parent / "storage"
 STORAGE_PATH.mkdir(exist_ok=True)
+
+# Initialize database
+try:
+    from database import init_db
+    init_db()
+except Exception as e:
+    print(f"[WARNING] Database initialization warning: {e}")
+    print("[INFO] App will continue - database will initialize on first request")
 
 app = FastAPI(
     title="ATS Resume Analyzer API",
@@ -25,14 +29,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Get CORS origins from environment or use defaults
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -51,6 +53,19 @@ UPLOADS_PATH.mkdir(exist_ok=True)
 
 REPORTS_PATH = Path(__file__).parent / "storage" / "reports"
 REPORTS_PATH.mkdir(parents=True, exist_ok=True)
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database on app startup"""
+    try:
+        from database import init_db
+        init_db()
+        print("[INFO] Database initialized successfully on startup")
+    except Exception as e:
+        print(f"[ERROR] Database initialization failed: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 @app.get("/")

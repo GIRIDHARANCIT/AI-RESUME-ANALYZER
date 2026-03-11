@@ -57,24 +57,44 @@ class OTPStore(Base):
 # Create engine
 def get_engine():
     """Get SQLAlchemy engine with SQLite."""
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    engine = create_engine(
-        DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        echo=False,
-    )
-    return engine
+    try:
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        engine = create_engine(
+            DATABASE_URL,
+            connect_args={"check_same_thread": False},
+            echo=False,
+        )
+        # Test connection
+        with engine.connect() as conn:
+            pass
+        print(f"[Database] Engine created successfully at {DB_PATH}")
+        return engine
+    except Exception as e:
+        print(f"[ERROR] Failed to create database engine: {e}")
+        raise
 
 
 # Create session factory
-engine = get_engine()
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+try:
+    engine = get_engine()
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+except Exception as e:
+    print(f"[ERROR] Failed to initialize database session: {e}")
+    raise
 
 
 def init_db():
-    """Initialize database tables."""
-    Base.metadata.create_all(bind=engine)
-    print(f"[Database] Initialized SQLite at {DB_PATH}")
+    """Initialize database tables with error handling."""
+    try:
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        Base.metadata.create_all(bind=engine)
+        print(f"[Database] Initialized SQLite at {DB_PATH}")
+        return True
+    except Exception as e:
+        print(f"[ERROR] Database initialization failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 
 def get_db() -> Session:

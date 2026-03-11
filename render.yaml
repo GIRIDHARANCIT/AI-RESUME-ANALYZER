@@ -1,9 +1,9 @@
 services:
   - type: web
     name: ai-resume-analyzer-api
-    runtime: python
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port 8000
+    runtime: python-3.13
+    buildCommand: pip install --upgrade pip && pip install -r backend/requirements.txt
+    startCommand: bash start.sh
     envVars:
       - key: ALLOWED_ORIGINS
         value: https://ai-resume-analyzer.onrender.com

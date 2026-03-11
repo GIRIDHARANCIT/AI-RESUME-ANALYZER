@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: ai-resume-analyzer-api
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port 8000
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: https://ai-resume-analyzer.onrender.com
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+  - type: web
+    name: ai-resume-analyzer
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://ai-resume-analyzer-api.onrender.com

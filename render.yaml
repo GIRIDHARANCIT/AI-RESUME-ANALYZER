@@ -1,18 +1,16 @@
 services:
   - type: web
     name: ai-resume-analyzer-api
-    runtime: python-3.13
-    buildCommand: pip install --upgrade pip && pip install -r backend/requirements.txt
-    startCommand: bash start.sh
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: ALLOWED_ORIGINS
         value: https://ai-resume-analyzer.onrender.com
       - key: PYTHONUNBUFFERED
         value: "1"
 
-  - type: web
+  - type: static
     name: ai-resume-analyzer
-    runtime: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
     envVars:
